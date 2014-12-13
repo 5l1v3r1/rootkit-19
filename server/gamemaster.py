@@ -19,6 +19,7 @@ class Game(object):
         player.set_command(turn)
 
     def dump(self):
+        print "-----------------------------------------------"
         for player in self.players:
             player.dump()
 
@@ -58,8 +59,11 @@ class Server(object):
     def __str__(self):
         return str(self.ip)
 
-    def dump(self):
+    def dump(self, player):
         print "Server: %s" % self.ip
+        for w in self.weaknesses:
+            if player.index in w.found_by:
+                print "    '%s' weakness" % w
 
 
 class Player(object):
@@ -84,11 +88,12 @@ class Player(object):
             print "    %d cycle(s) left" % self.current_cmd.duration
         for server in self.servers:
             print "   ",
-            server.dump()
+            server.dump(self)
         if self.known_servers:
-            print "Known servers"
+            print "    Known servers"
             for k in self.known_servers:
-                k.dump()
+                print "   ",
+                k.dump(self)
 
 class Command(object):
     def __init__(self):
@@ -166,11 +171,12 @@ class Probe(Command):
             if player.index in weakness.found_by:
                 weakness = None
             else:
-                weakness.found_by.append(weakness)
+                weakness.found_by.append(player.index)
             if weakness:
                 return "Found '%s' weakness on %s" % (weakness, self.server)
 
         return "No new weakness found on %s" % self.server
+
 
 if __name__ == '__main__':
     game = Game()
